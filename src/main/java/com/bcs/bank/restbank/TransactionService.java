@@ -219,41 +219,7 @@ public class TransactionService {
                     bank.addTransactionToTransactions(receiverTransactionDto);
                     bank.incrementTransactionId();
                     receiverAccount.setBalance(receiverNewBalance);
-
                 }
-
-                return requestResult;
-
-            case RECEIVE_MONEY:
-                receiverAccountNumber = transactionDto.getReceiverAccountNumber();
-                if(!accountService.accountNumberExist(accounts, receiverAccountNumber)) {
-                    requestResult.setMessage("No such account number " + receiverAccountNumber);
-                    return requestResult;
-                }
-
-                AccountDto receiverAccount = accountService.getAccountByNumber(accounts, receiverAccountNumber);
-
-                //arvutame välja uue balance
-                newBalance = balance + amount;
-
-                // täidame ära transactionDto
-                transactionDto.setSenderAccountNumber(ATM);
-                transactionDto.setReceiverAccountNumber(account.getAccountNumber());
-                transactionDto.setBalance(newBalance);
-                transactionDto.setLocalDateTime(LocalDateTime.now());
-                transactionDto.setId(transactionId);
-
-                //lisame tehingu transactinite alla ja inkremeteerime
-                bank.addTransactionToTransactions(transactionDto);
-                bank.incrementTransactionId();
-
-                //uuendame konto balance'it
-                account.setBalance(newBalance);
-
-                //meisterdame valmis result objekti
-                requestResult.setTransactionId(transactionId);
-                requestResult.setAccountId(accountId);
-                requestResult.setMessage("Successfully made deposit transaction");
                 return requestResult;
 
             default:
@@ -261,6 +227,49 @@ public class TransactionService {
                 return requestResult;
         }
 
+    }
+// loome uue klassi, mis tagastab request..., selle nimi on receive ....( sellesse annan kaasa/ on objektid nimedega...)
+    public RequestResult receiveNewTransaction(Bank bank, TransactionDto transactionDto) {
+        //loome muutujad if-st välja, sest plaanime neid veel kasutatda.
+//        loome need muutujad, sest kasutame neid juba mitmel korral.
+
+        RequestResult requestResult = new RequestResult();
+        String receiverAccountNumber = transactionDto.getReceiverAccountNumber();
+        List<AccountDto> accounts = bank.getAccounts();
+
+//        kontollime, kas seda kontot meie pangas üldse on
+
+        if (!accountService.accountNumberExist(accounts, receiverAccountNumber)) {
+            requestResult.setError("No such account in our bank!" + receiverAccountNumber);
+            return requestResult;
+        }
+
+//        meil on vaja nüüd seda kontot ( sest ta eksisteerib)
+
+        AccountDto receiverAccount = accountService.getAccountByNumber(accounts, receiverAccountNumber);
+        int transactionId = bank.getTransactionIdCount();
+
+//        võtame receiveri balance ja lisame juurde, mis sõnumist saime ja paneme selle muutujasse
+//        hoiame seda järjekorda, mis varem tegime
+        int receiverNewBalance = receiverAccount.getBalance() + transactionDto.getAmount();
+
+        transactionDto.setTransactionType(RECEIVE_MONEY);
+        transactionDto.setBalance(receiverNewBalance);
+        transactionDto.setId(transactionId);
+        transactionDto.setAccountId(receiverAccount.getId());
+        transactionDto.setLocalDateTime(LocalDateTime.now());
+
+//      nüüd lisame selle tehingu banka
+        bank.addTransactionToTransactions(transactionDto);
+        bank.incrementTransactionId();
+
+//      muudame balacei ära
+        receiverAccount.setBalance(receiverNewBalance);
+
+        requestResult.setTransactionId(transactionId);
+        requestResult.setMessage("Transaction received");
+
+        return requestResult;
     }
 
 
