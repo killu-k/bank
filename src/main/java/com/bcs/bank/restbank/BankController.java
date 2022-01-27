@@ -80,8 +80,11 @@ public class BankController {
     }
 
 
-    //  loo transactionService alla uus teenus                                      createTransactionForNewAccount()
-    //  loo bankService alla uus teenus                                             addTransaction()
+//    todo endpoint, millega saab kontot lukustada/avada. kontrollige ka id olemasolu.
 
+    @DeleteMapping("/delete/account")
+    public RequestResult deleteAccount(@RequestParam int accountId) {
 
+        return accountService.deleteAccount(bank.getAccounts(), accountId);
+    }
 }
