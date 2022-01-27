@@ -78,4 +78,23 @@ public class AccountService {
         }
         return null;
     }
+
+    public RequestResult updateOwnerDetails(List<AccountDto> accounts, AccountDto accountDto) {
+        RequestResult requestResult = new RequestResult();
+
+        int accountId = accountDto.getId();
+        if (!accountIdExist(accounts, accountId)){
+            requestResult.setError("Account ID " + accountId + "does not exist!");
+            requestResult.setAccountId(accountId);
+            return requestResult;
+        }
+        AccountDto account = getAccountById(accounts, accountId);
+        account.setFirstName(accountDto.getFirstName());
+        accountDto.setLastName(accountDto.getLastName());
+
+        requestResult.setAccountId(accountId);
+        requestResult.setMessage("Successfully updated account");
+
+        return requestResult;
+    }
 }
