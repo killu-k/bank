@@ -81,10 +81,23 @@ public class BankController {
 
 
 //    todo endpoint, millega saab kontot lukustada/avada. kontrollige ka id olemasolu.
+//    lock/status
 
     @DeleteMapping("/delete/account")
     public RequestResult deleteAccount(@RequestParam int accountId) {
 
         return accountService.deleteAccount(bank.getAccounts(), accountId);
     }
+
+    @PutMapping("/lock/account")
+    public RequestResult lockAccount(@RequestBody AccountDto accountDto) {
+
+       return accountService.lockAccount(bank.getAccounts(), accountDto);
+
+    }
+
+    // todo: loo endpoint /bankstatement/by/lastname
+
+
+
 }

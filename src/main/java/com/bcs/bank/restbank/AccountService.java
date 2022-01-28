@@ -40,6 +40,15 @@ public class AccountService {
         return false;
     }
 
+    public boolean accountLocked(List<AccountDto> accounts, int accountId) {
+        for (AccountDto account : accounts) {
+            if (!account.getLocked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public AccountDto getAccountById(List<AccountDto> accounts, int accountId) {
 
         //todo: käime läbi kõik koontod accounts listis ja
@@ -98,6 +107,38 @@ public class AccountService {
 
         return requestResult;
     }
+
+    public RequestResult lockAccount(List<AccountDto> accounts, AccountDto accountDto) {
+        RequestResult requestResult = new RequestResult();
+
+//        kõigepealt kontrollin , kas see konto on olemas
+
+        int accountId = accountDto.getId();
+        if (!accountIdExist(accounts, accountId)){
+            requestResult.setError("Account ID " + accountId + "does not exist!");
+            requestResult.setAccountId(accountId);
+            return requestResult;
+        }
+
+//        kui konto on olemas, siis nüüd pean kontrollima
+        AccountDto account = getAccountById(accounts, accountId);
+        if (account.getLocked()) {
+            account.setLocked(false);
+            requestResult.setMessage("Account is unlocked");
+        } else {
+            account.setLocked(true);
+            requestResult.setMessage("Account is locked");
+        }
+
+        requestResult.setAccountId(accountId);
+
+        return requestResult;
+
+    }
+
+//    public boolean getAccountIsLocked(List<AccountDto> accounts, boolean isAccountLocked) {
+//        accountService.accountIsLocked(accounts, isAccountLocked);
+//    }
 
     public RequestResult deleteAccount(List<AccountDto> accounts, int accountId) {
         RequestResult requestResult = new RequestResult();
